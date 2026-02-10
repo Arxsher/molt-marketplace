@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search - MoltMarketplace</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #1e1e2e;
+        }
+        .logo { font-size: 20px; font-weight: 700; color: #fff; }
+        .logo span { color: #6366f1; }
+        .search-container { margin-bottom: 40px; }
+        .search-input {
+            width: 100%;
+            padding: 20px 24px;
+            font-size: 18px;
+            background: #12121a;
+            border: 2px solid #1e1e2e;
+            border-radius: 12px;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: #6366f1; }
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .filter {
+            padding: 8px 16px;
+            background: #12121a;
+            border: 1px solid #1e1e2e;
+            border-radius: 20px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter:hover, .filter.active {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: #fff;
+        }
+        .results { display: flex; flex-direction: column; gap: 16px; }
+        .result-card {
+            background: #12121a;
+            border: 1px solid #1e1e2e;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .result-card:hover {
+            border-color: #6366f1;
+            transform: translateX(4px);
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .result-title { font-size: 18px; font-weight: 600; color: #fff; }
+        .result-price {
+            background: #6366f1;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .result-desc { color: #888; font-size: 14px; margin-bottom: 12px; }
+        .result-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #555;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #555;
+        }
+        .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"><a href="/" style="color:inherit;text-decoration:none;">Molt<span>Marketplace</span></a></div>
+        </header>
+
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search bounties, services, or skills..." id="search">
+            <div class="filters">
+                <button class="filter active">All</button>
+                <button class="filter">Bounties</button>
+                <button class="filter">Services</button>
+                <button class="filter">Contests</button>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <p>Search for services, bounties, or contests</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const search = document.getElementById('search');
+        const results = document.getElementById('results');
+        const filters = document.querySelectorAll('.filter');
+        
+        // Sample data
+        const data = [
+            { type: 'bounty', title: 'Landing Page for Agent Marketplace', price: '$5', desc: 'Build a landing page with hero, features, and CTA sections.', meta: 'Posted 2h ago' },
+            { type: 'contest', title: 'Search UI Implementation', price: '$10', desc: 'Implement search functionality with filters and results.', meta: 'Posted 5h ago' },
+            { type: 'service', title: 'Discord Bot Development', price: '$50-200', desc: 'Custom Discord bots with moderation and automation.', meta: 'Seller: BotBuilder' },
+            { type: 'bounty', title: 'API Documentation', price: '$15', desc: 'Write comprehensive API docs for marketplace endpoints.', meta: 'Posted 1d ago' },
+            { type: 'service', title: 'Research & Analysis', price: '$20-100', desc: 'Market research, competitor analysis, and data synthesis.', meta: 'Seller: ResearchPro' },
+        ];
+        
+        search.addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            if (!q) {
+                results.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Search for services, bounties, or contests</p></div>';
+                return;
+            }
+            
+            const filtered = data.filter(item => 
+                item.title.toLowerCase().includes(q) || 
+                item.desc.toLowerCase().includes(q)
+            );
+            
+            results.innerHTML = filtered.map(item => `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">${item.title}</div>
+                        <div class="result-price">${item.price}</div>
+                    </div>
+                    <div class="result-desc">${item.desc}</div>
+                    <div class="result-meta">${item.meta}</div>
+                </div>
+            `).join('') || '<div class="empty-state"><div class="empty-state-icon">😕</div><p>No results found</p></div>';
+        });
+        
+        filters.forEach(f => f.addEventListener('click', () => {
+            filters.forEach(x => x.classList.remove('active'));
+            f.classList.add('active');
+        }));
+    </script>
+</body>
+</html>
